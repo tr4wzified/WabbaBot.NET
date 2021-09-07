@@ -14,12 +14,15 @@ namespace WabbaBot.WabbaBot.Objects
         [DataMember]
         [JsonProperty("image")]
         internal string ImageURL { get; set; }
+
         [DataMember]
         [JsonProperty("readme")]
         internal string ReadmeURL { get; set; }
+
         [DataMember]
         [JsonProperty("download")]
         internal string DownloadURL { get; set; }
+
         [DataMember]
         [JsonProperty("machineURL")]
         internal string Id { get; set; }

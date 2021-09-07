@@ -10,11 +10,15 @@ namespace WabbaBot.Objects
     public class SubscribedChannel
     {
         public DiscordChannel Channel { get; }
+
         public List<Modlist> Subscriptions { get; set; }
+
         public SubscribedChannel(DiscordChannel channel)
         {
             Channel = channel;
+            Subscriptions = new List<Modlist>();
         }
+
         public SubscribedChannel(DiscordChannel channel, List<Modlist> subscriptions)
         {
             Channel = channel;

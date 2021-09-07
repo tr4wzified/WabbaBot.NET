@@ -9,19 +9,17 @@ using System.Threading.Tasks;
 
 namespace WabbaBot
 {
-    public class Settings
+    static class Settings
     {
-        public string Token { get; set; }
+        public static string Token;
 
-        public string[] Prefixes { get; set; } = new string[] { "/" };
+        public static string[] Prefixes = new string[] { "/" };
 
-        public bool EnableDMs { get; set; } = false;
+        public static bool EnableDMs = false;
+        public static bool CaseSensitive = true;
+        public static string ModlistsDataURL = "https://raw.githubusercontent.com/wabbajack-tools/mod-lists/master/modlists.json";
 
-        public bool CaseSensitive { get; set; } = true;
-
-        public Settings()
-        {
-        }
-
+        public static int CacheRefreshInHours = 24;
+        public static string DiscordMaintainersPath = "./Config/Maintainers.json";
     }
 }

@@ -12,21 +12,35 @@ using WabbaBot.Objects;
 
 namespace WabbaBot.Core
 {
-    public class ModlistsDataCache
+    public static class ModlistsDataCache
     {
-        public string ModlistsDataURL { get; set; } = "https://raw.githubusercontent.com/wabbajack-tools/mod-lists/master/modlists.json";
-        public List<Modlist> Modlists { get; set; }
-        public ModlistsDataCache()
+
+        private static List<Modlist> _modlists;
+        public static void Refresh()
         {
+            Dictionary<string, List<long>> modlistMaintainerPairs;
             using (var webClient = new WebClient())
             {
-                var json = webClient.DownloadString(ModlistsDataURL);
-                Modlists = JsonConvert.DeserializeObject<List<Modlist>>(json);
+                var json = webClient.DownloadString(Settings.ModlistsDataURL);
+                _modlists = JsonConvert.DeserializeObject<List<Modlist>>(json);
+                modlistMaintainerPairs = JsonConvert.DeserializeObject<Dictionary<string, List<long>>>(File.ReadAllText(Settings.DiscordMaintainersPath));
+            }
+
+            foreach (var (modlistId, maintainers) in modlistMaintainerPairs)
+            {
+                var modlist = _modlists.Find(m => m.Links.Id == modlistId);
+                if (modlist != null)
+                {
+                    modlist.DiscordMaintainerIds = maintainers;
+                }
             }
         }
-        public ModlistsDataCache(string modlistsDataURL)
+        public static List<Modlist> GetModlists()
         {
-            ModlistsDataURL = modlistsDataURL;
+            if (_modlists == null)
+                Refresh();
+
+            return _modlists;
         }
     }
 }

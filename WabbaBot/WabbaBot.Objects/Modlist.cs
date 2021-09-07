@@ -60,5 +60,10 @@ namespace WabbaBot.Objects
         [DataMember]
         [JsonProperty("download_metadata")]
         public ModlistDownloadMetadata DownloadMetadata { get; set; }
+
+        [DataMember]
+        [JsonProperty("discord_maintainer_ids")]
+        public List<long> DiscordMaintainerIds { get; set; } = new List<long>();
+
     }
 }
