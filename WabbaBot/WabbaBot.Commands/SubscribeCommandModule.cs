@@ -16,6 +16,9 @@ namespace WabbaBot.Commands
         [Command("addmodlist")]
         public async Task AddModlistCommand(CommandContext cc, string modlistId, DiscordMember member)
         {
+            
+            await cc.TriggerTypingAsync();
+
             ModlistsDataCache.Refresh();
             List<Modlist> modlists = ModlistsDataCache.GetModlists();
             Modlist modlist = modlists.Find(m => m.Links.Id == modlistId);
@@ -25,7 +28,7 @@ namespace WabbaBot.Commands
             }
             else
             {
-                await cc.RespondAsync($"Something went wrong executing this command.");
+                await cc.RespondAsync($"**An error occurred**! Modlist with id **{modlistId}** not found in external modlists json.");
             }
         }
 

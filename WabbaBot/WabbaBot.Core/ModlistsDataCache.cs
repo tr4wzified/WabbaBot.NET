@@ -18,20 +18,26 @@ namespace WabbaBot.Core
         private static List<Modlist> _modlists;
         public static void Refresh()
         {
-            Dictionary<string, List<long>> modlistMaintainerPairs;
+            Dictionary<string, List<long>> modlistMaintainerPairs = null;
             using (var webClient = new WebClient())
             {
                 var json = webClient.DownloadString(Settings.ModlistsDataURL);
                 _modlists = JsonConvert.DeserializeObject<List<Modlist>>(json);
-                modlistMaintainerPairs = JsonConvert.DeserializeObject<Dictionary<string, List<long>>>(File.ReadAllText(Settings.DiscordMaintainersPath));
+                if (File.Exists(Settings.DiscordMaintainersPath))
+                {
+                    modlistMaintainerPairs = JsonConvert.DeserializeObject<Dictionary<string, List<long>>>(File.ReadAllText(Settings.DiscordMaintainersPath));
+                }
             }
 
-            foreach (var (modlistId, maintainers) in modlistMaintainerPairs)
+            if (modlistMaintainerPairs != null)
             {
-                var modlist = _modlists.Find(m => m.Links.Id == modlistId);
-                if (modlist != null)
+                foreach (var (modlistId, maintainers) in modlistMaintainerPairs)
                 {
-                    modlist.DiscordMaintainerIds = maintainers;
+                    var modlist = _modlists.Find(m => m.Links.Id == modlistId);
+                    if (modlist != null)
+                    {
+                        modlist.DiscordMaintainerIds = maintainers;
+                    }
                 }
             }
         }

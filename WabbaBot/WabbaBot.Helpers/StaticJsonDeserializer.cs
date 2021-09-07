@@ -27,8 +27,22 @@ namespace WabbaBot.Helpers
             {
                 var documentField = document[field.Name];
                 if (documentField == null)
-                    throw new JsonSerializationException($"Not found in JSON: {field.Name}");
-                field.SetValue(null, documentField.ToObject(field.FieldType));
+                {
+                    dynamic value = field.GetValue(staticClassType);
+                    if (value != null)
+                    {
+                        document[field.Name] = JsonConvert.SerializeObject(value, field.FieldType.BaseType, null);
+                        field.SetValue(null, value);
+                    }
+                    else
+                    {
+                        throw new JsonSerializationException($"No value found for {field.Name} in either JSON or static class.");
+                    }
+                }
+                else
+                {
+                    field.SetValue(null, documentField.ToObject(field.FieldType));
+                }
             }
         }
     }

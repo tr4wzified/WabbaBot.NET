@@ -19,6 +19,7 @@ namespace WabbaBot
             string configFolderPath = @".\Config";
             string settingsPath = Path.Combine(configFolderPath, "Settings.json");
             StaticJsonDeserializer.Deserialize(File.ReadAllText(settingsPath), typeof(Settings));
+
             MainAsync().GetAwaiter().GetResult();
         }
 
@@ -40,8 +41,6 @@ namespace WabbaBot
 
             var commands = discord.UseCommandsNext(commandsNextConfiguration);
             commands.RegisterCommands(Assembly.GetExecutingAssembly());
-
-            var modlists = ModlistsDataCache.GetModlists();
 
             await discord.ConnectAsync();
             await Task.Delay(-1);
