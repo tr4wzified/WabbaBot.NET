@@ -25,12 +25,15 @@ namespace WabbaBot
 
         internal static async Task MainAsync()
         {
-            var discord = new DiscordClient(new DiscordConfiguration()
+            var client = new DiscordClient(new DiscordConfiguration()
             {
                 Token = Settings.Token,
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged
             });
+
+            client.Ready += EventHandlers.OnReady;
+            client.ClientErrored += EventHandlers.OnClientError;
 
             var commandsNextConfiguration = new CommandsNextConfiguration()
             {
@@ -39,12 +42,15 @@ namespace WabbaBot
                 CaseSensitive = Settings.CaseSensitive
             };
 
-            var commands = discord.UseCommandsNext(commandsNextConfiguration);
+            var commands = client.UseCommandsNext(commandsNextConfiguration);
             commands.RegisterCommands(Assembly.GetExecutingAssembly());
 
-            await discord.ConnectAsync();
-            await Task.Delay(-1);
+            commands.CommandExecuted += EventHandlers.OnCommandExecuted;
+            commands.CommandErrored += EventHandlers.OnCommandErrored;
 
-        }   
+            await client.ConnectAsync();
+            await Task.Delay(-1);
+        }
+
     }
 }

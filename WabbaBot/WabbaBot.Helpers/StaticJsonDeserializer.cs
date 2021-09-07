@@ -11,7 +11,7 @@ namespace WabbaBot.Helpers
 {
     public static class StaticJsonDeserializer
     {
-        // Credit to https://stackoverflow.com/questions/60373210/newtonsoft-json-serialize-deserialize-static-class
+        // Partial credit to https://stackoverflow.com/questions/60373210/newtonsoft-json-serialize-deserialize-static-class
         public static void Deserialize(string json, Type staticClassType)
         {
             if (!staticClassType.IsClass)
