@@ -53,7 +53,7 @@ namespace WabbaBot.Commands
                 else
                     await cc.RespondAsync($"Modlist **{modlist.Title}** is no longer being maintained by **{discordMember.DisplayName}**.");
             }
-            else throw new NullReferenceException($"Modlist with id **{modlistId}** not found in external modlists json.");
+            else throw new NullReferenceException($"Modlist with id **{modlistId}** not found.");
         }
 
         [Command("delmaintainer")]
@@ -65,6 +65,49 @@ namespace WabbaBot.Commands
             {
                 // Ask to react with yes/no emoji to confirm deletion of all maintainers
             }
+        }
+
+        [Command("showmaintainers")]
+        public async Task ShowMaintainersCommand(CommandContext cc, string modlistId)
+        {
+            await cc.TriggerTypingAsync();
+
+            List<Modlist> modlists = ModlistsDataCache.GetModlists();
+            Modlist modlist = modlists.Find(m => m.Links.Id == modlistId);
+
+            StringBuilder message = new StringBuilder();
+            if (modlist != null)
+            {
+                message.AppendLine($"Modlist **{modlist.Title}** is being managed by the following people:");
+
+                for (int i = 0; i < modlist.DiscordMaintainerIds.Count; i++)
+                {
+                    var maintainerId = modlist.DiscordMaintainerIds[i];
+                    DiscordMember maintainer = default(DiscordMember);
+                    //var maintainer = Bot.Client.Guilds.Values.SelectMany(x => x.Members).FirstOrDefault(x => x.Value.Id == maintainerId).Value;
+                    foreach (var guild in Bot.Client.Guilds)
+                    {
+                        try
+                        {
+                            maintainer = guild.Value.GetMemberAsync(maintainerId).Result;
+                        }
+                        catch (AggregateException)
+                        {
+                            continue;
+                        }
+                    }
+                    if (maintainer != default(DiscordMember))
+                        message.Append($" **{maintainer.DisplayName}** ({maintainerId})");
+                    else
+                        message.Append($" *Unknown username.* ({maintainerId})");
+
+                    if (i < modlist.DiscordMaintainerIds.Count - 1)
+                        message.AppendLine(",");
+                }
+                await cc.RespondAsync(message.ToString());
+            }
+            else throw new NullReferenceException($"Modlist with id **{modlistId}** not found.");
+
         }
     }
 }
