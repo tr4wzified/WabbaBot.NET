@@ -30,7 +30,7 @@ namespace WabbaBot.Commands
 
                 modlist.DiscordMaintainerIds.Add(discordMember.Id);
                 modlists.ToSimplifiedOwnershipDictionary().SaveToJson(Bot.Settings.DiscordMaintainersPath);
-                await cc.RespondAsync($"Modlist **{modlist.Title}** is now maintained by by **{discordMember.DisplayName}** was added to the database.");
+                await cc.RespondAsync($"Modlist **{modlist.Title}** is now (additionally) maintained by **{discordMember.DisplayName}**.");
             }
             else
                 throw new NullReferenceException($"Modlist with id **{modlistId}** not found in external modlists json.");
