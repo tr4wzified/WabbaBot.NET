@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using WabbaBot.Commands;
 using WabbaBot.Core;
-using WabbaBot.Helpers;
 
 namespace WabbaBot
 {

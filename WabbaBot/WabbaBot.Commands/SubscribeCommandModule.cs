@@ -13,8 +13,8 @@ namespace WabbaBot.Commands
 {
     public class SubscribeCommandModule : BaseCommandModule
     {
-        [Command("addmodlist")]
-        public async Task AddModlistCommand(CommandContext cc, string modlistId, DiscordMember member)
+        [Command("addmaintainer")]
+        public async Task AddMaintainerCommand(CommandContext cc, string modlistId, DiscordMember discordMember)
         {
             
             await cc.TriggerTypingAsync();
@@ -23,12 +23,17 @@ namespace WabbaBot.Commands
             Modlist modlist = modlists.Find(m => m.Links.Id == modlistId);
             if (modlist != null)
             {
-                await cc.RespondAsync($"Modlist **{modlist.Title}** managed by **{member.DisplayName}** was added to the database.");
+                if (modlist.DiscordMaintainerIds.Contains(discordMember.Id))
+                {
+                    throw new Exception($"**{discordMember.DisplayName}** is already maintaining **{modlist.Title}");
+                }
+
+                modlist.DiscordMaintainerIds.Add(discordMember.Id);
+                modlists.ToSimplifiedOwnershipDictionary().SaveToJson(Bot.Settings.DiscordMaintainersPath);
+                await cc.RespondAsync($"Modlist **{modlist.Title}** is now maintained by by **{discordMember.DisplayName}** was added to the database.");
             }
             else
-            {
-                await cc.RespondAsync($"**An error occurred**! Modlist with id **{modlistId}** not found in external modlists json.");
-            }
+                throw new NullReferenceException($"Modlist with id **{modlistId}** not found in external modlists json.");
         }
 
         [Command("listen")]

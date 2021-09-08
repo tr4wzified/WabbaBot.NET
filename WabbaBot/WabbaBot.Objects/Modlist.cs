@@ -63,7 +63,16 @@ namespace WabbaBot.Objects
 
         [DataMember]
         [JsonProperty("discord_maintainer_ids")]
-        public List<long> DiscordMaintainerIds { get; set; } = new List<long>();
+        public List<ulong> DiscordMaintainerIds { get; set; }
+        public Modlist()
+        {
+            DiscordMaintainerIds = new List<ulong>();
+        }
+
+        public Modlist(List<ulong> maintainerIds)
+        {
+            DiscordMaintainerIds = maintainerIds;
+        }
 
     }
 }

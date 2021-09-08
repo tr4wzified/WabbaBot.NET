@@ -15,18 +15,18 @@ namespace WabbaBot.WabbaBot.Objects
         internal string Hash { get; set; }
 
         [DataMember]
-        internal long Size { get; set; }
+        internal ulong Size { get; set; }
 
         [DataMember]
-        internal long NumberOfArchives { get; set; }
+        internal ulong NumberOfArchives { get; set; }
 
         [DataMember]
-        internal long SizeOfArchives { get; set; }
+        internal ulong SizeOfArchives { get; set; }
 
         [DataMember]
-        internal long NumberOfInstalledFiles { get; set; }
+        internal ulong NumberOfInstalledFiles { get; set; }
 
         [DataMember]
-        internal long SizeOfInstalledFiles { get; set; }
+        internal ulong SizeOfInstalledFiles { get; set; }
     }
 }

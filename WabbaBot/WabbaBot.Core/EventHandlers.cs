@@ -22,32 +22,42 @@ namespace WabbaBot.Core
         }
         public static Task OnClientError(DiscordClient sender, ClientErrorEventArgs e)
         {
-            sender.Logger.LogError(e.Exception, "Exception occured!");
+            sender.Logger.LogError(e.Exception, "[ClientError]");
 
             return Task.CompletedTask;
         }
         public static Task OnCommandExecuted(CommandsNextExtension sender, CommandExecutionEventArgs e)
         {
-            e.Context.Client.Logger.LogInformation($"{e.Context.User.Username} executed '{e.Command.QualifiedName}'");
+            e.Context.Client.Logger.LogInformation($"[CommandExecuted] {e.Context.User.Username} ({e.Context.User.Id}): {e.Context.Message.Content}'");
 
             return Task.CompletedTask;
         }
         public static async Task OnCommandErrored(CommandsNextExtension sender, CommandErrorEventArgs e)
         {
-            e.Context.Client.Logger.LogError($"{e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
+            if (e.Exception is CommandNotFoundException)
+                return;
 
+            e.Context.Client.Logger.LogError($"[CommandError] {e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
+
+            var errorPrefix = "**An error occurred!** ";
             if (e.Exception is ChecksFailedException ex)
-            {
-                var emoji = DiscordEmoji.FromName(e.Context.Client, ":no_entry:");
-
-                var embed = new DiscordEmbedBuilder
+                await e.Context.RespondAsync($"{errorPrefix} You do not have the permissions required to execute this command.");
+            else if (e.Exception is ArgumentException) {
+                StringBuilder message = new StringBuilder();
+                message.AppendLine($"Too few arguments for command `{e.Command.Name}`!");
+                foreach (var overload in e.Command.Overloads)
                 {
-                    Title = "Access denied",
-                    Description = $"{emoji} You do not have the permissions required to execute this command.",
-                    Color = new DiscordColor(0xFF0000) // red
-                };
-                await e.Context.RespondAsync(embed);
+                    message.Append($"Usage: `{Bot.Settings.Prefixes[0]}{e.Command.Name}");
+                    foreach (var argument in overload.Arguments) {
+                        message.Append($" <{argument.Name}>");
+                    }
+                    message.Append("`");
+                }
+                await e.Context.RespondAsync(message.ToString());
             }
+            else
+                await e.Context.RespondAsync($"{errorPrefix} {e.Exception.Message}");
+
         }
     }
 }
