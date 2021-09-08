@@ -16,7 +16,7 @@ namespace WabbaBot.Core
     {
 
         private static List<Modlist> _modlists;
-        public static void Refresh()
+        private static void Refresh()
         {
             Dictionary<string, List<long>> modlistMaintainerPairs = null;
             using (var webClient = new WebClient())
@@ -41,9 +41,9 @@ namespace WabbaBot.Core
                 }
             }
         }
-        public static List<Modlist> GetModlists()
+        public static List<Modlist> GetModlists(bool forceRefresh = false)
         {
-            if (_modlists == null)
+            if (_modlists == null || forceRefresh)
                 Refresh();
 
             return _modlists;

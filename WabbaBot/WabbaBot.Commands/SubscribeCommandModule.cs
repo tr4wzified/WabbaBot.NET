@@ -19,8 +19,7 @@ namespace WabbaBot.Commands
             
             await cc.TriggerTypingAsync();
 
-            ModlistsDataCache.Refresh();
-            List<Modlist> modlists = ModlistsDataCache.GetModlists();
+            List<Modlist> modlists = ModlistsDataCache.GetModlists(forceRefresh: true);
             Modlist modlist = modlists.Find(m => m.Links.Id == modlistId);
             if (modlist != null)
             {
