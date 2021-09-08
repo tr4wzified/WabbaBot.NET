@@ -28,7 +28,7 @@ namespace WabbaBot.Core
         }
         public static Task OnCommandExecuted(CommandsNextExtension sender, CommandExecutionEventArgs e)
         {
-            e.Context.Client.Logger.LogInformation($"{e.Context.User.Username} successfully executed '{e.Command.QualifiedName}'");
+            e.Context.Client.Logger.LogInformation($"{e.Context.User.Username} executed '{e.Command.QualifiedName}'");
 
             return Task.CompletedTask;
         }

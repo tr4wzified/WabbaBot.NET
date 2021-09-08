@@ -21,11 +21,11 @@ namespace WabbaBot.Core
             Dictionary<string, List<long>> modlistMaintainerPairs = null;
             using (var webClient = new WebClient())
             {
-                var json = webClient.DownloadString(Settings.ModlistsDataURL);
+                var json = webClient.DownloadString(Bot.Settings.ModlistsDataURL);
                 _modlists = JsonConvert.DeserializeObject<List<Modlist>>(json);
-                if (File.Exists(Settings.DiscordMaintainersPath))
+                if (File.Exists(Bot.Settings.DiscordMaintainersPath))
                 {
-                    modlistMaintainerPairs = JsonConvert.DeserializeObject<Dictionary<string, List<long>>>(File.ReadAllText(Settings.DiscordMaintainersPath));
+                    modlistMaintainerPairs = JsonConvert.DeserializeObject<Dictionary<string, List<long>>>(File.ReadAllText(Bot.Settings.DiscordMaintainersPath));
                 }
             }
 

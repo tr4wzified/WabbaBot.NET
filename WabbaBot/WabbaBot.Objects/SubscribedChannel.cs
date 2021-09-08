@@ -1,4 +1,5 @@
-﻿using DSharpPlus.Entities;
+﻿using DSharpPlus;
+using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,20 +10,20 @@ namespace WabbaBot.Objects
 {
     public class SubscribedChannel
     {
-        public DiscordChannel Channel { get; }
-
+        public ulong Id { get; set; }
         public List<Modlist> Subscriptions { get; set; }
 
-        public SubscribedChannel(DiscordChannel channel)
+        public SubscribedChannel(ulong channelId)
         {
-            Channel = channel;
+            Id = channelId;
             Subscriptions = new List<Modlist>();
         }
 
-        public SubscribedChannel(DiscordChannel channel, List<Modlist> subscriptions)
+        public SubscribedChannel(ulong channelId, List<Modlist> subscriptions)
         {
-            Channel = channel;
+            Id = channelId;
             Subscriptions = subscriptions;
         }
+
     }
 }
