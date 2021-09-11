@@ -56,6 +56,7 @@ namespace WabbaBot.Commands
             else throw new NullReferenceException($"Modlist with id **{modlistId}** not found.");
         }
 
+        /*
         [Command("delmaintainer")]
         public async Task DelMaintainerCommand(CommandContext cc, string text)
         {
@@ -66,6 +67,7 @@ namespace WabbaBot.Commands
                 // Ask to react with yes/no emoji to confirm deletion of all maintainers
             }
         }
+        */
 
         [Command("showmaintainers")]
         public async Task ShowMaintainersCommand(CommandContext cc, string modlistId)
@@ -84,12 +86,12 @@ namespace WabbaBot.Commands
                 {
                     var maintainerId = modlist.DiscordMaintainerIds[i];
                     DiscordMember maintainer = default(DiscordMember);
-                    //var maintainer = Bot.Client.Guilds.Values.SelectMany(x => x.Members).FirstOrDefault(x => x.Value.Id == maintainerId).Value;
                     foreach (var guild in Bot.Client.Guilds)
                     {
                         try
                         {
                             maintainer = guild.Value.GetMemberAsync(maintainerId).Result;
+                            break;
                         }
                         catch (AggregateException)
                         {
@@ -107,7 +109,30 @@ namespace WabbaBot.Commands
                 await cc.RespondAsync(message.ToString());
             }
             else throw new NullReferenceException($"Modlist with id **{modlistId}** not found.");
+        }
 
+        public async Task SubscribeCommand(CommandContext cc, string modlistId, DiscordChannel channel)
+        {
+            var newSubscribedServer = new SubscribedServer(cc.Guild);
+            if (Bot.SubscribedServers.TryGetValue(newSubscribedServer, out var subscribedServer))
+            {
+                var newSubscribedChannel = new SubscribedChannel(channel.Id);
+                if (subscribedServer.SubscribedChannels.TryGetValue(newSubscribedChannel, out var subscribedChannel))
+                    subscribedChannel.Subscriptions.Add(modlistId);
+                else
+                {
+                    newSubscribedChannel.Subscriptions.Add(modlistId);
+                    subscribedServer.SubscribedChannels.Add(newSubscribedChannel);
+                }
+            }
+            else
+            {
+                newSubscribedServer.SubscribedChannels.Add(new SubscribedChannel(channel.Id, new List<string>() { modlistId }));
+            }
+        }
+        public async Task ListenCommand(CommandContext cc, string modlistId, DiscordChannel channel)
+        {
+            await SubscribeCommand(cc, modlistId, channel);
         }
     }
 }

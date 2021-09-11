@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WabbaBot.Core;
+using WabbaBot.Objects;
 
 namespace WabbaBot
 {
@@ -18,6 +19,7 @@ namespace WabbaBot
         public static CommandsNextExtension Commands { get; private set; }
         public static Settings Settings { get; private set; }
         public static bool IsRunning { get; private set; }
+        public static HashSet<SubscribedServer> SubscribedServers { get; private set; }
 
         public Bot(Settings settings)
         {
@@ -32,6 +34,8 @@ namespace WabbaBot
 
             Client.Ready += EventHandlers.OnReady;
             Client.ClientErrored += EventHandlers.OnClientError;
+
+            SubscribedServers = new HashSet<SubscribedServer>();
 
             CommandsConfiguration = new CommandsNextConfiguration()
             {
