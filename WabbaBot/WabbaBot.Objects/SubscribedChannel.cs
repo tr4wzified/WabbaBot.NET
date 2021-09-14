@@ -34,10 +34,6 @@ namespace WabbaBot.Objects
             Id = channelId;
             Subscriptions = subscriptions;
         }
-        /*
-        public static bool operator ==(SubscribedChannel a, SubscribedChannel b) => a.Id == b.Id;
-        public static bool operator !=(SubscribedChannel a, SubscribedChannel b) => a.Id != b.Id;
-        */
 
     }
 }
