@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,6 @@ namespace WabbaBot.Commands
         [Command("addmaintainer")]
         public async Task AddMaintainerCommand(CommandContext cc, string modlistId, DiscordMember discordMember)
         {
-            
             await cc.TriggerTypingAsync();
 
             List<Modlist> modlists = ModlistsDataCache.GetModlists(forceRefresh: true);
@@ -27,7 +27,7 @@ namespace WabbaBot.Commands
                     throw new Exception($"User **{discordMember.DisplayName}** is already maintaining **{modlist.Title}**.");
 
                 modlist.DiscordMaintainerIds.Add(discordMember.Id);
-                modlists.ToSimplifiedOwnershipDictionary().SaveToJson(Bot.Settings.DiscordMaintainersPath);
+                modlists.ToSimplifiedOwnershipDictionary().Save();
                 await cc.RespondAsync($"Modlist **{modlist.Title}** is now {(modlist.DiscordMaintainerIds.Count >= 2 ? "additionally maintained" : "solely maintained")} by **{discordMember.DisplayName}**.");
             }
             else throw new NullReferenceException($"Modlist with id **{modlistId}** not found in external modlists json.");
@@ -47,7 +47,7 @@ namespace WabbaBot.Commands
                     throw new Exception($"**{discordMember.DisplayName}** wasn't maintaining **{modlist.Title}** in the first place.");
 
                 modlist.DiscordMaintainerIds.Remove(discordMember.Id);
-                modlists.ToSimplifiedOwnershipDictionary().SaveToJson(Bot.Settings.DiscordMaintainersPath);
+                modlists.ToSimplifiedOwnershipDictionary().Save();
                 if (!modlist.DiscordMaintainerIds.Any())
                     await cc.RespondAsync($"Modlist **{modlist.Title}** is no longer being maintained by anyone.");
                 else
@@ -55,19 +55,6 @@ namespace WabbaBot.Commands
             }
             else throw new NullReferenceException($"Modlist with id **{modlistId}** not found.");
         }
-
-        /*
-        [Command("delmaintainer")]
-        public async Task DelMaintainerCommand(CommandContext cc, string text)
-        {
-            await cc.TriggerTypingAsync();
-
-            if (text.ToLower() == "all")
-            {
-                // Ask to react with yes/no emoji to confirm deletion of all maintainers
-            }
-        }
-        */
 
         [Command("showmaintainers")]
         public async Task ShowMaintainersCommand(CommandContext cc, string modlistId)
@@ -111,28 +98,79 @@ namespace WabbaBot.Commands
             else throw new NullReferenceException($"Modlist with id **{modlistId}** not found.");
         }
 
+        [Command("subscribe")]
+        [Aliases("listen")]
         public async Task SubscribeCommand(CommandContext cc, string modlistId, DiscordChannel channel)
         {
-            var newSubscribedServer = new SubscribedServer(cc.Guild);
-            if (Bot.SubscribedServers.TryGetValue(newSubscribedServer, out var subscribedServer))
+            await cc.TriggerTypingAsync();
+
+            Modlist modlist = ModlistsDataCache.GetModlists().FirstOrDefault(m => m.Links.Id == modlistId);
+            if (modlist == default(Modlist))
+                throw new Exception($"Modlist with id **{modlistId}** does not exist or does not have any maintainers!");
+
+
+            bool success = false;
+            var server = Bot.SubscribedServers.FirstOrDefault(ss => ss.Id == cc.Guild.Id);
+
+            if (server != null && server != default(SubscribedServer))
             {
-                var newSubscribedChannel = new SubscribedChannel(channel.Id);
-                if (subscribedServer.SubscribedChannels.TryGetValue(newSubscribedChannel, out var subscribedChannel))
-                    subscribedChannel.Subscriptions.Add(modlistId);
+                var subscribedChannel = server.SubscribedChannels.FirstOrDefault(sc => sc.Id == channel.Id);
+                if (subscribedChannel != null && subscribedChannel != default(SubscribedChannel))
+                {
+                    if (subscribedChannel.Subscriptions.Contains(modlistId))
+                        throw new Exception($"Channel {channel.Mention} is already subscribed to **{modlist.Title}**!");
+
+                    success = subscribedChannel.Subscriptions.Add(modlistId);
+                }
                 else
                 {
-                    newSubscribedChannel.Subscriptions.Add(modlistId);
-                    subscribedServer.SubscribedChannels.Add(newSubscribedChannel);
+                    subscribedChannel = new SubscribedChannel(channel.Id);
+                    success = subscribedChannel.Subscriptions.Add(modlistId);
+                    server.SubscribedChannels.Add(subscribedChannel);
                 }
             }
             else
             {
-                newSubscribedServer.SubscribedChannels.Add(new SubscribedChannel(channel.Id, new List<string>() { modlistId }));
+                server = new SubscribedServer(cc.Guild);
+                success = server.SubscribedChannels.Add(new SubscribedChannel(channel.Id, new HashSet<string>() { modlistId }));
+                Bot.SubscribedServers.Add(server);
+            }
+
+            if (success)
+            {
+                Bot.SubscribedServers.Save();
+                await cc.RespondAsync($"Channel {channel.Mention} will now receive notifications whenever a new version of **{modlist.Title}** releases!");
             }
         }
-        public async Task ListenCommand(CommandContext cc, string modlistId, DiscordChannel channel)
+
+        [Command("unsubscribe")]
+        [Aliases("unlisten")]
+        public async Task UnsubscribeCommand(CommandContext cc, string modlistId, DiscordChannel channel)
         {
-            await SubscribeCommand(cc, modlistId, channel);
+            await cc.TriggerTypingAsync();
+
+            var subscribedServer = Bot.SubscribedServers.FirstOrDefault(ss => ss.Id == cc.Guild.Id);
+            if (subscribedServer != null && subscribedServer != default(SubscribedServer))
+            {
+                var subscribedChannel = subscribedServer.SubscribedChannels.FirstOrDefault(sc => sc.Id == channel.Id);
+                if (subscribedChannel != null && subscribedChannel != default(SubscribedChannel))
+                {
+                    if (subscribedChannel.Subscriptions.Remove(modlistId))
+                    {
+                        if (!subscribedChannel.Subscriptions.Any())
+                            subscribedServer.SubscribedChannels.Remove(subscribedChannel);
+
+                        if (!subscribedServer.SubscribedChannels.Any())
+                            Bot.SubscribedServers.Remove(subscribedServer);
+
+                        Bot.SubscribedServers.Save();
+                        await cc.RespondAsync($"Channel {channel.Mention} will no longer receive release notifications of modlist **{ModlistsDataCache.GetModlists().FirstOrDefault(modlist => modlist.Links.Id == modlistId).Title}**!");
+                    }
+                    else throw new Exception($"Channel {channel.Mention} is not listening to this modlist!");
+                }
+                else throw new Exception($"Channel {channel.Mention} is not subscribed to any modlists!");
+            }
+            else throw new Exception("This server is not subscribed to any modlists!");
         }
     }
 }

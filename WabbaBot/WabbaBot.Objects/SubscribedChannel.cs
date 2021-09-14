@@ -21,19 +21,23 @@ namespace WabbaBot.Objects
         [JsonProperty("listening_to")]
         public HashSet<string> Subscriptions { get; set; }
 
+        public SubscribedChannel() { }
+
         public SubscribedChannel(ulong channelId)
         {
             Id = channelId;
             Subscriptions = new HashSet<string>();
         }
 
-        public SubscribedChannel(ulong channelId, List<string> subscriptions)
+        public SubscribedChannel(ulong channelId, HashSet<string> subscriptions)
         {
             Id = channelId;
             Subscriptions = subscriptions;
         }
+        /*
         public static bool operator ==(SubscribedChannel a, SubscribedChannel b) => a.Id == b.Id;
         public static bool operator !=(SubscribedChannel a, SubscribedChannel b) => a.Id != b.Id;
+        */
 
     }
 }

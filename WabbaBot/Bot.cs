@@ -1,7 +1,9 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -35,7 +37,10 @@ namespace WabbaBot
             Client.Ready += EventHandlers.OnReady;
             Client.ClientErrored += EventHandlers.OnClientError;
 
-            SubscribedServers = new HashSet<SubscribedServer>();
+            if (File.Exists(Settings.SubscribedServersPath))
+                SubscribedServers = JsonConvert.DeserializeObject<HashSet<SubscribedServer>>(File.ReadAllText(Settings.SubscribedServersPath));
+            else
+                SubscribedServers = new HashSet<SubscribedServer>();
 
             CommandsConfiguration = new CommandsNextConfiguration()
             {

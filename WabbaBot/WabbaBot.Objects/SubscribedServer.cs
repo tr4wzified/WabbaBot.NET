@@ -24,11 +24,7 @@ namespace WabbaBot.Objects
         [DataMember]
         [JsonProperty("list_roles")]
         public Dictionary<string, ulong> SubscriptionPingRoles { get; set; }
-        public SubscribedServer()
-        {
-            SubscribedChannels = new HashSet<SubscribedChannel>();
-            SubscriptionPingRoles = new Dictionary<string, ulong>();
-        }
+        public SubscribedServer() { }
         public SubscribedServer(DiscordGuild guild)
         {
             Id = guild.Id;
@@ -46,7 +42,7 @@ namespace WabbaBot.Objects
         }
         public HashSet<string> GetSubscriptions() => SubscribedChannels.SelectMany(c => c.Subscriptions).Distinct().ToHashSet();
 
-        public static bool operator ==(SubscribedServer a, SubscribedServer b) => a.Id == b.Id;
-        public static bool operator !=(SubscribedServer a, SubscribedServer b) => a.Id != b.Id;
+        public static bool operator ==(DiscordGuild a, SubscribedServer b) => a.Id == b.Id;
+        public static bool operator !=(DiscordGuild a, SubscribedServer b) => a.Id == b.Id;
     }
 }

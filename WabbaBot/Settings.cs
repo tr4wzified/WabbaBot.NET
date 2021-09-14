@@ -22,5 +22,6 @@ namespace WabbaBot
 
         public int CacheRefreshInHours = 24;
         public string DiscordMaintainersPath = "./Config/Maintainers.json";
+        public string SubscribedServersPath = "./Config/SubscribedServers.json";
     }
 }
