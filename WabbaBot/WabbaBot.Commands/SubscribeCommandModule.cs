@@ -172,5 +172,42 @@ namespace WabbaBot.Commands
             }
             else throw new Exception("This server is not subscribed to any modlists!");
         }
+
+        [Command("subscriptions")]
+        [Aliases("showlisteners")]
+        public async Task SubscriptionsCommand(CommandContext cc)
+        {
+            await cc.TriggerTypingAsync();
+
+            var subscribedServer = Bot.SubscribedServers.FirstOrDefault(ss => ss.Id == cc.Guild.Id);
+            if (subscribedServer != null && subscribedServer != default(SubscribedServer))
+            {
+                StringBuilder message = new StringBuilder();
+                message.AppendLine($"Server **{cc.Guild.Name}** is receiving modlist release notifications in {subscribedServer.SubscribedChannels.Count} {(subscribedServer.SubscribedChannels.Count > 1 ? "channels" : "channel")}.");
+                var modlists = ModlistsDataCache.GetModlists();
+                foreach (var subscribedChannel in subscribedServer.SubscribedChannels)
+                {
+                    message.Append($"{subscribedChannel.ToDiscordChannel().Mention} will receive release notifications for{(subscribedChannel.Subscriptions.Count > 1 ? " the following lists:" : "")}");
+                    int i = 0;
+                    foreach (var modlistId in subscribedChannel.Subscriptions)
+                    {
+                        var modlist = modlists.FirstOrDefault(modlist => modlist.Links.Id == modlistId);
+
+                        if (i == subscribedChannel.Subscriptions.Count - 1)
+                            message.Append($" **{modlist.Title}**");
+                        else
+                            message.Append($" **{modlist.Title}**,");
+
+                        i++;
+                    }
+                    message.AppendLine(".");
+                }
+                await cc.RespondAsync(message.ToString());
+            }
+            else
+                throw new Exception("This server is not receiving any release messages at the moment - there are no subscription details to show.");
+
+        }
+
     }
 }
