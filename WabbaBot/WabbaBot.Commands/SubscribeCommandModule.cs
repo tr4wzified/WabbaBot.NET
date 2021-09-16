@@ -209,5 +209,24 @@ namespace WabbaBot.Commands
 
         }
 
+        [Command("setrole")]
+        public async Task SetRoleCommand(CommandContext cc, string modlistId, DiscordRole role)
+        {
+            await cc.TriggerTypingAsync();
+
+            var modlists = ModlistsDataCache.GetModlists();
+            var modlist = modlists.FirstOrDefault(m => m.Links.Id == modlistId);
+            if (modlist == null || modlist == default(Modlist))
+                throw new Exception($"Modlist with id {modlistId} does not exist!");
+
+            var subscribedServer = Bot.SubscribedServers.FirstOrDefault(ss => ss.Id == cc.Guild.Id);
+            if (subscribedServer == null || subscribedServer == default(SubscribedServer))
+                throw new Exception("This server is not receiving any release messages at the moment - please set one up first!");
+
+            subscribedServer.SetPingRole(modlist, role);
+            Bot.SubscribedServers.Save();
+            await cc.RespondAsync($"Releases for **{modlist.Title}** will now ping the **{role.Name}** role!");
+        }
+
     }
 }

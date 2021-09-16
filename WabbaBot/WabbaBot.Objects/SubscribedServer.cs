@@ -24,6 +24,7 @@ namespace WabbaBot.Objects
         [DataMember]
         [JsonProperty("list_roles")]
         public Dictionary<string, ulong> SubscriptionPingRoles { get; set; }
+
         public SubscribedServer() { }
         public SubscribedServer(DiscordGuild guild)
         {
@@ -31,15 +32,15 @@ namespace WabbaBot.Objects
             SubscribedChannels = new HashSet<SubscribedChannel>();
             SubscriptionPingRoles = new Dictionary<string, ulong>();
         }
+
         public void SetPingRole(Modlist modlist, DiscordRole role)
         {
             if (GetSubscriptions().Contains(modlist.Links.Id))
-            {
                 SubscriptionPingRoles[modlist.Links.Id] = role.Id;
-            }
             else
                 throw new NullReferenceException($"There are no channels listening to {modlist.Title}.");
         }
+
         public HashSet<string> GetSubscriptions() => SubscribedChannels.SelectMany(c => c.Subscriptions).Distinct().ToHashSet();
 
         public static bool operator ==(DiscordGuild a, SubscribedServer b) => a.Id == b.Id;
