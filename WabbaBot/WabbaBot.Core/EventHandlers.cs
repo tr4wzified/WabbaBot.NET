@@ -40,7 +40,7 @@ namespace WabbaBot.Core
             e.Context.Client.Logger.LogError($"[CommandError] {e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}", DateTime.Now);
 
             var errorPrefix = "**An error occurred!** ";
-            if (e.Exception is ChecksFailedException ex)
+            if (e.Exception is ChecksFailedException)
                 await e.Context.RespondAsync($"{errorPrefix} You do not have the permissions required to execute this command.");
             else if (e.Exception is ArgumentException) {
                 StringBuilder message = new StringBuilder();

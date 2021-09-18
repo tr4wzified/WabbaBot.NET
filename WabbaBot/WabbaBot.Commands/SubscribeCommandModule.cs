@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WabbaBot.Attributes;
 using WabbaBot.Core;
 using WabbaBot.Objects;
 
@@ -56,7 +57,7 @@ namespace WabbaBot.Commands
             else throw new NullReferenceException($"Modlist with id **{modlistId}** not found.");
         }
 
-        [Command("showmaintainers")]
+        [Command("showmaintainers"), Aliases("showmaintainer")]
         public async Task ShowMaintainersCommand(CommandContext cc, string modlistId)
         {
             await cc.TriggerTypingAsync();
@@ -98,8 +99,7 @@ namespace WabbaBot.Commands
             else throw new NullReferenceException($"Modlist with id **{modlistId}** not found.");
         }
 
-        [Command("subscribe")]
-        [Aliases("listen")]
+        [Command("subscribe"), Aliases("listen")]
         public async Task SubscribeCommand(CommandContext cc, string modlistId, DiscordChannel channel)
         {
             await cc.TriggerTypingAsync();
@@ -143,8 +143,7 @@ namespace WabbaBot.Commands
             }
         }
 
-        [Command("unsubscribe")]
-        [Aliases("unlisten")]
+        [Command("unsubscribe"), Aliases("unlisten")]
         public async Task UnsubscribeCommand(CommandContext cc, string modlistId, DiscordChannel channel)
         {
             await cc.TriggerTypingAsync();
@@ -173,8 +172,7 @@ namespace WabbaBot.Commands
             else throw new Exception("This server is not subscribed to any modlists!");
         }
 
-        [Command("subscriptions")]
-        [Aliases("showlisteners")]
+        [Command("subscriptions"), Aliases("showlisteners")]
         public async Task SubscriptionsCommand(CommandContext cc)
         {
             await cc.TriggerTypingAsync();
@@ -226,6 +224,11 @@ namespace WabbaBot.Commands
             subscribedServer.SetPingRole(modlist, role);
             Bot.SubscribedServers.Save();
             await cc.RespondAsync($"Releases for **{modlist.Title}** will now ping the **{role.Name}** role!");
+        }
+
+        [Command("release")]
+        public async Task ReleaseCommand(CommandContext cc, string modlistId, [RemainingText] string message)
+        {
         }
 
     }
